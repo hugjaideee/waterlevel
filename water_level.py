@@ -95,9 +95,9 @@ def ReadWaterLevel():
             frame = frame[y:y+h, x:x+w]
             gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
             blur = cv.GaussianBlur(gray,(5,5),0)
+            edges = cv.Canny(blur, 100, 200)
 
             # find lowest edge pixels and append to waterLevelPixels 
-            edges = cv.Canny(blur, 100, 200)
             lowestedge = h
             for edge in np.flip(edges):
                 if 255 in edge:
@@ -122,9 +122,8 @@ def ReadWaterLevel():
         deltaWaterLevel = higherWaterLevel - lowerWaterLevel
         deltaPixel = 50
         lowerPixel = ceil(interval)*50
-        interpolate = int(lowerWaterLevel + (deltaWaterLevel/deltaPixel)*(lowerPixel-medianPixels))
-        medianWaterLevel = interpolate
-        print(f"median pixel water level: {medianPixels} px")
+        medianWaterLevel = int(lowerWaterLevel + (deltaWaterLevel/deltaPixel)*(lowerPixel-medianPixels))
+        print(f"median pixel wa-ter level: {medianPixels} px")
         print(f"median water level: {medianWaterLevel} cm")
 
         # moving average
@@ -193,7 +192,9 @@ def webhook():
 
                 else:   
                     print("REPLYING...")
-                    reply(event["replyToken"], f"Water level: {averageWaterLevel} cm\nWater level status: {alertLevelReference[alertLevel]}\n Next alert ({alertLevelReference[alertLevel+1]}) at {alertLevelThreshholds[alertLevel]} cm")
+                    reply(event["replyToken"], f"Water level: {averageWaterLevel} cm"+
+                          "\nWater level status: {alertLevelReference[alertLevel]}"+
+                          "\n Next alert ({alertLevelReference[alertLevel+1]}) at {alertLevelThreshholds[alertLevel]} cm")
         return "POST", 200
     elif request.method == "GET":
         return "GET", 200
